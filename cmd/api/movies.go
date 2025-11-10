@@ -6,11 +6,10 @@ import (
 	"time"
 
 	"github.com/NikitaAksenov/LetsGoFurther/internal/data"
+	"github.com/NikitaAksenov/LetsGoFurther/internal/validator"
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new movie")
-
 	var input struct {
 		Title   string       `json:"title"`
 		Year    int32        `json:"year"`
@@ -21,6 +20,20 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	m := &data.Movie{
+		Title:   input.Title,
+		Year:    input.Year,
+		Runtime: input.Runtime,
+		Genres:  input.Genres,
+	}
+
+	v := validator.New()
+
+	if data.ValidateMovie(v, m); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
