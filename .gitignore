@@ -1,0 +1,2 @@
+# Ignore sqlite's DB file
+*.db
