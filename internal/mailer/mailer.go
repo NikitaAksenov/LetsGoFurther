@@ -85,5 +85,17 @@ func (m *Mailer) Send(recipient string, templateFile string, data any) error {
 	msg.SetBodyString(mail.TypeTextPlain, plainBody.String())
 	msg.AddAlternativeString(mail.TypeTextHTML, htmlBody.String())
 
-	return m.client.DialAndSend(msg)
+	retriesCount := 3
+	for i := range retriesCount {
+		err = m.client.DialAndSend(msg)
+		if err == nil {
+			return nil
+		}
+
+		if i != retriesCount {
+			time.Sleep(3 * time.Second)
+		}
+	}
+
+	return err
 }
